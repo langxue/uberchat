@@ -5,7 +5,9 @@ and send out links to your friends.
 
 var sys = require("sys");
 var express = require("express");
-var app = express.createServer();
+var app = express();
+var http = require('http');
+var server = http.createServer(app);
 
 // Configuration
 var config = require("./config.js").configure();
@@ -48,12 +50,22 @@ app.get("/room/:id", function(req, res) {
 });
 
 // Starting HTTP server
-app.listen(config.port);
-sys.log("Starting app on port "+config.port);
+//app.listen(config.port);
+
 
 // Setting up Socket.IO
+
+//var http = require('http')
+//  , server = http.createServer(app)
+//  , io = require('socket.io').listen(server);
+//
+//server.listen(3000);
+
+
 var io = require("socket.io");
-var socket = io.listen(app, { transports: config.transports });
+var socket = io.listen(server);
+server.listen(config.port);
+sys.log("Starting app on port "+config.port);
 
 // Random id generator
 var generateId = function() {
