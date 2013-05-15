@@ -26,7 +26,7 @@ var Talk = {
     send: function(data) {
         if (!data.room)
             data.room = Talk.room;
-        Talk.socket.send(data);
+        Talk.socket.send(JSON.stringify(data));//{name:"aaa",room:Talk.room});
     },
 
     // Upon initial connection, request a name
@@ -238,8 +238,7 @@ var Talk = {
     // Set up the Talk object.
     init: function(options) {
         Talk.room = options.room;
-        Talk.socket = new io.Socket(null, options);
-        Talk.socket.connect();
+        Talk.socket = io.connect(null,options);
         Talk.socket.on("connect", Talk.connect);
         Talk.socket.on("message", Talk.receive);
         Talk.socket.on("disconnect", Talk.disconnect);

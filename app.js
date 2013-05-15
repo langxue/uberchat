@@ -7,7 +7,7 @@ var sys = require("sys");
 var express = require("express");
 var app = express();
 var http = require('http');
-var server = http.createServer(app);
+
 
 // Configuration
 var config = require("./config.js").configure();
@@ -49,21 +49,11 @@ app.get("/room/:id", function(req, res) {
     res.render("room.ejs", { room: room, config: config });
 });
 
-// Starting HTTP server
-//app.listen(config.port);
 
-
-// Setting up Socket.IO
-
-//var http = require('http')
-//  , server = http.createServer(app)
-//  , io = require('socket.io').listen(server);
-//
-//server.listen(3000);
-
-
+var server = http.createServer(app);
 var io = require("socket.io");
 var socket = io.listen(server);
+
 server.listen(config.port);
 sys.log("Starting app on port "+config.port);
 
@@ -101,7 +91,7 @@ var Room = function(id, name) {
 
     // Wrapper for Users.allUsers
     this.allUsers = function() {
-        return this.users.allUsers();  
+        return this.users.allUsers();
     };
 
     // Wrapper for Users.sendToAll
@@ -171,9 +161,9 @@ var Rooms = {
         if (!data.message) {
             data.message = "Closing room.";
         }
-        Commands.close(Rooms.rooms[name].users, data); 
+        Commands.close(Rooms.rooms[name].users, data);
     }
-    
+
 };
 
 // A simple user object
@@ -266,7 +256,7 @@ var Users = function(room) {
             var diff = now - user.activity;
             if (diff > config.awayTimout) {
                 if (user.status != "away") {
-                    
+
                     user.status = "away";
                     Commands.away(user, {});
                 }
@@ -281,7 +271,7 @@ var Users = function(room) {
 
 // The list of interface commands the server can send / receive
 var Commands = {
-    
+
     // Alert all users that a room is closing
     close: function(room, data) {
         data = { command: "close",
@@ -371,7 +361,7 @@ var Commands = {
 
     // The request commands (from a user)
     commands: {
-        
+
         // A user is submitting a name for the room
         name: function(user, data) {
             var message = null;
@@ -431,7 +421,7 @@ var Commands = {
 socket.on("connection", function(client) {
     client.user = new User(client);
     client.on("message", function(data) {
-        Commands.parse(client.user, data);
+        Commands.parse(client.user, JSON.parse(data));
     });
 
     client.on("disconnect", function() {
